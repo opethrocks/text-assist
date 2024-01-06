@@ -11,11 +11,11 @@ let buildMsg = async () => {
   //Destructuring assignment to extract the object containing the phone number from the API response.
 
   let {
-    data: [msgProfile],
-  } = await responseObj.phone_numbers(); //API call for the phone_numbers method which returns 
+    data: [{ phone_number: fromNumber }],
+  } = await responseObj.phone_numbers(); //API call for the phone_numbers method which returns
   //an array of objects containing the phone number associated with the messaging profile.
 
-  console.log(msgProfile.phone_number);
+  console.log(fromNumber);
 };
 
 buildMsg();
