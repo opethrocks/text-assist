@@ -46,19 +46,19 @@ app.post("/", (req, res) => {
     let {
       data: {
         payload: {
-          from: { phone_number: phoneNumber },
+          from: { phone_number: incomingNumber },
         },
       },
     } = req.body;
 
     let {
       data: {
-        payload: { text: msgBody },
+        payload: { text: messageContent },
       },
     } = req.body;
 
     //Call the compose module and pass the sender phone number and message text so a reply can be sent.
-    compose(phoneNumber, msgBody);
+    compose(incomingNumber, messageContent);
   } else {
     //If there are errors on the request, send error code and log errors to the console.
     res.sendStatus(500);
