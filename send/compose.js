@@ -1,30 +1,49 @@
-const telnyx = require("telnyx")(process.env.TELNYX_API_KEY);
+const Telnyx = require("telnyx");
+require("dotenv").config();
 
-//const msgSend = require("./send");
+const apiKey = process.env.TELNYX_API_KEY;
+const telnyx = Telnyx(apiKey);
 
-let buildMsg = async () => {
-  //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
-  const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
-    process.env.TELNYX_MSG_PROFILE_ID,
-  );
+let compose = async (toNumber, messageContent) => {
+  try {
+    //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
+    const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
+      process.env.TELNYX_MSG_PROFILE_ID
+    );
 
-  //Destructuring assignment to extract the object containing the phone number from the API response.
+    //Destructuring assignment to extract the object containing the phone number from the API response.
+    //Returns an array of objects containing the phone number associated with the messaging profile.
+    let {
+      data: [{ phone_number: fromNumber }],
+    } = await responseObj.phone_numbers();
 
-  let {
-    data: [{ phone_number: fromNumber }],
-  } = await responseObj.phone_numbers(); //API call for the phone_numbers method which returns
-  //an array of objects containing the phone number associated with the messaging profile.
-
-  console.log(fromNumber);
+    //If the messageContent matches a certain pattern, use the Telnyx SDK to send a reply
+    if (messageContent == "hello") {
+      telnyx.messages.create(
+        { from: fromNumber, to: toNumber, text: "Hi there! How are you?" },
+        function (err, response) {
+          if (err) {
+            throw new Error(response);
+          }
+        }
+      );
+    } else {
+      telnyx.messages.create(
+        {
+          from: fromNumber,
+          to: toNumber,
+          text: "That was not a proper greeting",
+        },
+        function (err, response) {
+          if (err) {
+            throw new Error(response);
+          }
+        }
+      );
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-buildMsg();
-
-// let createMsg = telnyx.messages.create(
-//   { from: "number", to: "number", text: "message" },
-//   function (err, response) {
-//     console.log(err);
-//   },
-// );
-
-module.exports = buildMsg;
+module.exports = compose;

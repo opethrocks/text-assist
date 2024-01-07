@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
+const compose = require("../send/compose");
 require("dotenv").config();
 
 const app = express();
@@ -24,20 +25,23 @@ app.post("/", (req, res) => {
     },
   } = req.body;
 
+  //Use the telnyx SDK to verify the signature found in the header.
+  //If errors add them to errors array and throw
   try {
     telnyx.webhooks.signature.verifySignature(
       webhookRawBody,
       webhookTelnyxSignatureHeader,
       webhookTelnyxTimestampHeader,
       publicKey,
-      timeToleranceInSeconds,
+      timeToleranceInSeconds
     );
   } catch (e) {
     errors.push(e.message);
+    throw new Error(errors);
   }
 
   //If errors array is empty, send successful response and destructre phoneNumber and msgBody from req.body
-  if (errors.length == 0) {
+  if (errors.length === 0) {
     res.sendStatus(200);
     let {
       data: {
@@ -46,19 +50,19 @@ app.post("/", (req, res) => {
         },
       },
     } = req.body;
+
     let {
       data: {
         payload: { text: msgBody },
       },
     } = req.body;
-    //Log the sender phone number and message body to the console
-    console.log(`New message from: ${phoneNumber.slice(2, 12)}`);
-    console.log(`Message content: ${msgBody}`);
+
+    //Call the compose module and pass the sender phone number and message text so a reply can be sent.
+    compose(phoneNumber, msgBody);
   } else {
     //If there are errors on the request, send error code and log errors to the console.
     res.sendStatus(500);
     console.log(errors);
-    return;
   }
 });
 
