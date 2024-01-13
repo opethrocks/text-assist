@@ -25,8 +25,8 @@ app.post("/", (req, res) => {
     },
   } = req.body;
 
-  //Use the telnyx SDK to verify the signature found in the header.
-  //If errors add them to errors array and throw
+  /*Use the telnyx SDK to verify the signature found in the header.
+  If errors add them to errors array and throw*/
   try {
     telnyx.webhooks.signature.verifySignature(
       webhookRawBody,
