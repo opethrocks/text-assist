@@ -21,7 +21,7 @@ app.post("/", (req, res) => {
   //Destructure the errors array from req.body
   let {
     data: {
-      payload: { errors: errors },
+      payload: { errors: errors, id: messageID },
     },
   } = req.body;
 
@@ -59,6 +59,7 @@ app.post("/", (req, res) => {
 
     //Call the compose module and pass the sender phone number and message text so a reply can be sent.
     compose(incomingNumber, messageContent);
+    
   } else {
     //If there are errors on the request, send error code and log errors to the console.
     res.sendStatus(500);
