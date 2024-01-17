@@ -4,15 +4,15 @@ const Telnyx = require("telnyx");
 const compose = require("../send/compose");
 require("dotenv").config();
 
-const app = express();
-app.use(bodyParser.json());
+const receive = express();
+receive.use(bodyParser.json());
 
 const apiKey = process.env.TELNYX_API_KEY;
 const publicKey = process.env.TELNYX_PUBLIC_KEY;
 
 const telnyx = Telnyx(apiKey);
 
-app.post("/", (req, res) => {
+receive.post("/", (req, res) => {
   const timeToleranceInSeconds = 300; // Will validate signatures of webhooks up to 5 minutes after Telnyx sent the request
   const webhookTelnyxSignatureHeader = req.header("telnyx-signature-ed25519");
   const webhookTelnyxTimestampHeader = req.header("telnyx-timestamp");
@@ -62,6 +62,6 @@ app.post("/", (req, res) => {
 });
 
 const port = 8080;
-app.listen(port, () => console.log(`App running on port ${port}`));
+receive.listen(port, () => console.log(`App running on port ${port}`));
 
-module.exports = app;
+module.exports = receive;
