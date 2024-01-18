@@ -10,7 +10,7 @@ let compose = async (destinationNumber, messageContent) => {
   try {
     //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
     const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
-      process.env.TELNYX_MSG_PROFILE_ID
+      process.env.TELNYX_MSG_PROFILE_ID,
     );
 
     /*Destructuring assignment to extract the object containing the phone number from the Telnyx API response.
@@ -19,8 +19,9 @@ let compose = async (destinationNumber, messageContent) => {
       data: [{ phone_number: telnyxNumber }],
     } = await responseObj.phone_numbers();
 
-    //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
-    let chat = async () => {
+    //If the destinationNumber does not match our telnyxNumber, call the chat function
+    if (destinationNumber != telnyxNumber) {
+      //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
       const completion = await openai.chat.completions.create({
         messages: [
           { role: "system", content: "You are a helpful assistant." },
@@ -35,16 +36,12 @@ let compose = async (destinationNumber, messageContent) => {
           to: destinationNumber,
           text: completion.choices[0].message.content,
         },
-        function (err, response) {
+        function (err) {
           if (err) {
-            throw new Error(response);
+            throw new Error(err);
           }
-        }
+        },
       );
-    };
-    //If the destinationNumber does not match our telnyxNumber, call the chat function
-    if (destinationNumber != telnyxNumber) {
-      chat();
     }
   } catch (err) {
     console.log(err);

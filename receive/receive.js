@@ -61,7 +61,7 @@ receive.post("/", (req, res) => {
   }
 });
 
-const port = 8080;
+const port = 8000;
 receive.listen(port, () => console.log(`App running on port ${port}`));
 
 module.exports = receive;
