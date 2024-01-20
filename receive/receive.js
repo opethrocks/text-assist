@@ -61,8 +61,4 @@ receive.post("/", (req, res) => {
   }
 });
 
-receive.listen(process.env.TENYX_APP_PORT, () =>
-  console.log(`App running on port ${process.env.TENYX_APP_PORT}`)
-);
-
 module.exports = receive;
