@@ -3,7 +3,8 @@ const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
 
-const uploadFile = async (filePath, incomingNumber, msgID) => {
+const uploadFile = async (filePath, incomingNumber, msgID, eventType) => {
+  //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
   const s3Client = new S3({
     endpoint: process.env.SPACES_ENDPOINT,
     forcePathStyle: false,
@@ -14,28 +15,32 @@ const uploadFile = async (filePath, incomingNumber, msgID) => {
     },
   });
 
-  try {
-    fileStream = await fs.readFile(filePath);
-    const params = {
-      Bucket: "assistext",
-      Key: `attachments/${incomingNumber}/${msgID}.png`,
-      Body: fileStream,
-      ACL: "private",
-      Metadata: {
-        "x-amz-meta-my-key": "your-value",
-      },
-    };
-    const data = await s3Client.send(new PutObjectCommand(params));
-    console.log(
-      "Successfully uploaded object: " + params.Bucket + "/" + params.Key
-    );
-    return data;
-  } catch (err) {
-    console.log("Error", err);
+  //Only upload attachments on the message finalized event from Telnyx response object.
+  //Format destination in spaces by incoming number, name file by message ID.
+  if (eventType === "message.finalized") {
+    try {
+      fileStream = await fs.readFile(filePath);
+      const params = {
+        Bucket: "assistext",
+        Key: `attachments/${incomingNumber}/${msgID}.png`,
+        Body: fileStream,
+        ACL: "private",
+        Metadata: {
+          "x-amz-meta-my-key": "your-value",
+        },
+      };
+      const data = await s3Client.send(new PutObjectCommand(params));
+      console.log(
+        "Successfully uploaded object: " + params.Bucket + "/" + params.Key
+      );
+      return data;
+    } catch (err) {
+      console.log("Error", err);
+    }
   }
 };
 
-const downloadFile = async (url, incomingNumber, msgID) => {
+const downloadFile = async (url, incomingNumber, msgID, eventType) => {
   const fileLocation = path.resolve(
     __dirname,
     url.substring(url.lastIndexOf("/") + 1)
@@ -51,7 +56,7 @@ const downloadFile = async (url, incomingNumber, msgID) => {
   } catch (err) {
     throw new Error(err);
   }
-  uploadFile(fileLocation, incomingNumber, msgID);
+  uploadFile(fileLocation, incomingNumber, msgID, eventType);
 };
 
 module.exports = downloadFile;
