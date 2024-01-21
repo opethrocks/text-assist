@@ -46,6 +46,7 @@ receive.post("/", async (req, res) => {
     res.sendStatus(200);
     let {
       data: {
+        id: msgID,
         payload: {
           from: { phone_number: incomingNumber },
           text: messageContent,
@@ -54,10 +55,11 @@ receive.post("/", async (req, res) => {
     } = req.body;
 
     // uploadFile(mediaFile);
+    attachments.map(async (attachment) => {
+      downloadFile(attachment.url, incomingNumber, msgID);
+    });
 
-    attachments.map((attachment) => downloadFile(attachment.url));
-
-    //Call the compose module and pass the sender phone number and message text so a reply can be sent.
+    //Call the send module and pass the sender phone number and message text so a reply can be sent.
     send(incomingNumber, messageContent);
   } else {
     //If there are errors on the request, send error code and log errors to the console.
