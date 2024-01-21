@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
 const send = require("../send/send");
 const downloadFile = require("../media/media");
-const uploadFile = require("../media/media");
 require("dotenv").config();
 
 const receive = express();
@@ -14,7 +13,7 @@ const publicKey = process.env.TELNYX_PUBLIC_KEY;
 
 const telnyx = Telnyx(apiKey);
 
-receive.post("/", (req, res) => {
+receive.post("/", async (req, res) => {
   const timeToleranceInSeconds = 300; // Will validate signatures of webhooks up to 5 minutes after Telnyx sent the request
   const webhookTelnyxSignatureHeader = req.header("telnyx-signature-ed25519");
   const webhookTelnyxTimestampHeader = req.header("telnyx-timestamp");
@@ -26,8 +25,6 @@ receive.post("/", (req, res) => {
       payload: { errors: errors, media: attachments },
     },
   } = req.body;
-
-  console.log(attachments)
 
   /*Use the telnyx SDK to verify the signature found in the header.
   If errors add them to errors array and throw*/
@@ -55,6 +52,10 @@ receive.post("/", (req, res) => {
         },
       },
     } = req.body;
+
+    // uploadFile(mediaFile);
+
+    attachments.map((attachment) => downloadFile(attachment.url));
 
     //Call the compose module and pass the sender phone number and message text so a reply can be sent.
     send(incomingNumber, messageContent);
