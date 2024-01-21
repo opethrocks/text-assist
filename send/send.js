@@ -6,7 +6,7 @@ const apiKey = process.env.TELNYX_API_KEY;
 const telnyx = Telnyx(apiKey);
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
-let compose = async (destinationNumber, messageContent) => {
+let send = async (destinationNumber, messageContent) => {
   try {
     //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
     const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
@@ -48,4 +48,4 @@ let compose = async (destinationNumber, messageContent) => {
   }
 };
 
-module.exports = compose;
+module.exports = send;
