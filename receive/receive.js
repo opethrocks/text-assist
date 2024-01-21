@@ -1,7 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
-const compose = require("../send/compose");
+const send = require("../send/send");
+const downloadFile = require("../media/media");
+const uploadFile = require("../media/media");
 require("dotenv").config();
 
 const receive = express();
@@ -21,9 +23,11 @@ receive.post("/", (req, res) => {
   //Destructure the errors array from req.body
   let {
     data: {
-      payload: { errors: errors },
+      payload: { errors: errors, media: attachments },
     },
   } = req.body;
+
+  console.log(attachments)
 
   /*Use the telnyx SDK to verify the signature found in the header.
   If errors add them to errors array and throw*/
@@ -53,7 +57,7 @@ receive.post("/", (req, res) => {
     } = req.body;
 
     //Call the compose module and pass the sender phone number and message text so a reply can be sent.
-    compose(incomingNumber, messageContent);
+    send(incomingNumber, messageContent);
   } else {
     //If there are errors on the request, send error code and log errors to the console.
     res.sendStatus(500);
