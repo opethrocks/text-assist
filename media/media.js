@@ -3,7 +3,7 @@ const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
 
-const uploadFile = async (filePath) => {
+const uploadFile = async (filePath, incomingNumber, msgID) => {
   const s3Client = new S3({
     endpoint: process.env.SPACES_ENDPOINT,
     forcePathStyle: false,
@@ -18,7 +18,7 @@ const uploadFile = async (filePath) => {
     fileStream = await fs.readFile(filePath);
     const params = {
       Bucket: "assistext",
-      Key: "attachments/test",
+      Key: `attachments/${incomingNumber}/${msgID}.png`,
       Body: fileStream,
       ACL: "private",
       Metadata: {
@@ -35,7 +35,7 @@ const uploadFile = async (filePath) => {
   }
 };
 
-const downloadFile = async (url) => {
+const downloadFile = async (url, incomingNumber, msgID) => {
   const fileLocation = path.resolve(
     __dirname,
     url.substring(url.lastIndexOf("/") + 1)
@@ -51,7 +51,7 @@ const downloadFile = async (url) => {
   } catch (err) {
     throw new Error(err);
   }
-  uploadFile(fileLocation);
+  uploadFile(fileLocation, incomingNumber, msgID);
 };
 
 module.exports = downloadFile;
