@@ -1,0 +1,62 @@
+const fs = require("fs").promises;
+const path = require("path");
+const axios = require("axios");
+const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
+
+const uploadFile = async (filePath, incomingNumber, msgID, eventType) => {
+  //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
+  const s3Client = new S3({
+    endpoint: process.env.SPACES_ENDPOINT,
+    forcePathStyle: false,
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: "DO00EXUUYXNLDZRLK6ZX",
+      secretAccessKey: process.env.SPACES_ACCESS_KEY,
+    },
+  });
+
+  //Only upload attachments on the message finalized event from Telnyx response object.
+  //Format destination in spaces by incoming number, name file by message ID.
+  if (eventType === "message.finalized") {
+    try {
+      fileStream = await fs.readFile(filePath);
+      const params = {
+        Bucket: "assistext",
+        Key: `attachments/${incomingNumber}/${msgID}.png`,
+        Body: fileStream,
+        ACL: "private",
+        Metadata: {
+          "x-amz-meta-my-key": "your-value",
+        },
+      };
+      const data = await s3Client.send(new PutObjectCommand(params));
+      console.log(
+        "Successfully uploaded object: " + params.Bucket + "/" + params.Key
+      );
+      return data;
+    } catch (err) {
+      console.log("Error", err);
+    }
+  }
+};
+
+const downloadFile = async (url, incomingNumber, msgID, eventType) => {
+  const fileLocation = path.resolve(
+    __dirname,
+    url.substring(url.lastIndexOf("/") + 1)
+  );
+
+  try {
+    const response = await axios({
+      method: "get",
+      url: url,
+      responseType: "stream",
+    });
+    await fs.writeFile(fileLocation, response.data);
+  } catch (err) {
+    throw new Error(err);
+  }
+  uploadFile(fileLocation, incomingNumber, msgID, eventType);
+};
+
+module.exports = downloadFile;

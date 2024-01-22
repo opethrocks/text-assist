@@ -1,7 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
-const compose = require("../send/compose");
+const send = require("../send/send");
+const downloadFile = require("../media/media");
 require("dotenv").config();
 
 const receive = express();
@@ -12,7 +13,7 @@ const publicKey = process.env.TELNYX_PUBLIC_KEY;
 
 const telnyx = Telnyx(apiKey);
 
-receive.post("/", (req, res) => {
+receive.post("/", async (req, res) => {
   const timeToleranceInSeconds = 300; // Will validate signatures of webhooks up to 5 minutes after Telnyx sent the request
   const webhookTelnyxSignatureHeader = req.header("telnyx-signature-ed25519");
   const webhookTelnyxTimestampHeader = req.header("telnyx-timestamp");
@@ -21,7 +22,7 @@ receive.post("/", (req, res) => {
   //Destructure the errors array from req.body
   let {
     data: {
-      payload: { errors: errors },
+      payload: { errors: errors, media: attachments },
     },
   } = req.body;
 
@@ -45,6 +46,8 @@ receive.post("/", (req, res) => {
     res.sendStatus(200);
     let {
       data: {
+        event_type: eventType,
+        id: msgID,
         payload: {
           from: { phone_number: incomingNumber },
           text: messageContent,
@@ -52,16 +55,20 @@ receive.post("/", (req, res) => {
       },
     } = req.body;
 
-    //Call the compose module and pass the sender phone number and message text so a reply can be sent.
-    compose(incomingNumber, messageContent);
+    if (attachments.length !== 0) {
+      // uploadFile(mediaFile);
+      attachments.map(async (attachment) => {
+        await downloadFile(attachment.url, incomingNumber, msgID, eventType);
+      });
+    }
+
+    //Call the send module and pass the sender phone number and message text so a reply can be sent.
+    send(incomingNumber, messageContent, eventType);
   } else {
     //If there are errors on the request, send error code and log errors to the console.
     res.sendStatus(500);
     console.log(errors);
   }
 });
-
-const port = 8000;
-receive.listen(port, () => console.log(`App running on port ${port}`));
 
 module.exports = receive;
