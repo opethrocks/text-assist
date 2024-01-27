@@ -1,12 +1,19 @@
 const Telnyx = require("telnyx");
 const OpenAI = require("openai");
+const mediaHandler = require("../media/media");
 require("dotenv").config();
 
 const apiKey = process.env.TELNYX_API_KEY;
 const telnyx = Telnyx(apiKey);
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
-let send = async (destinationNumber, messageContent, eventType) => {
+let send = async (
+  incomingNumber,
+  messageContent,
+  formattedMessage,
+  msgID,
+  generateImage
+) => {
   try {
     //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
     const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
@@ -19,40 +26,28 @@ let send = async (destinationNumber, messageContent, eventType) => {
       data: [{ phone_number: telnyxNumber }],
     } = await responseObj.phone_numbers();
 
-    //If the destinationNumber does not match our telnyxNumber, call the chat function or image generator
+    //If the incomingNumber does not match our telnyxNumber, call the chat function or image generator
     //Also check the message type to prevent double uploads to spaces
-    if (destinationNumber != telnyxNumber && eventType === "message.received") {
-      //Triggers array of words that indicate a user is a requesting an image
-      const triggers = ["image", "photo", "picture", "painting"];
-      const generateImage = triggers.some((item) =>
-        messageContent.includes(item)
-      );
-      //Remove punctuation from message content
-      const regex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
-      const formattedMessage = messageContent.replace(regex, "");
-
+    if (incomingNumber != telnyxNumber) {
       //If generateImage is true, call openai images generate.
       if (generateImage) {
+        const url = [];
         const response = await openai.images.generate({
           model: "dall-e-2",
-          prompt: messageContent,
+          prompt: formattedMessage,
           n: 1,
           size: "512x512",
         });
+
         //Extract image URL from response object
-        const url = [];
         url.push(response.data[0].url);
 
         //Call Telnyx message creation function, pass openai image URL, format text response appropriatelyF
         telnyx.messages.create(
           {
             from: telnyxNumber,
-            to: destinationNumber,
-            text: `Here is your ${formattedMessage.slice(
-              formattedMessage.indexOf(
-                triggers.find((word) => formattedMessage.includes(word))
-              )
-            )}`,
+            to: incomingNumber,
+            text: `Here is your ${formattedMessage}`,
             media_urls: url,
           },
           function (err) {
@@ -61,6 +56,7 @@ let send = async (destinationNumber, messageContent, eventType) => {
             }
           }
         );
+        await mediaHandler(url, incomingNumber, formattedMessage, msgID);
       } else {
         //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
         const completion = await openai.chat.completions.create({
@@ -74,7 +70,7 @@ let send = async (destinationNumber, messageContent, eventType) => {
         telnyx.messages.create(
           {
             from: telnyxNumber,
-            to: destinationNumber,
+            to: incomingNumber,
             text: completion.choices[0].message.content,
           },
           function (err) {
