@@ -27,6 +27,10 @@ let send = async (destinationNumber, messageContent, eventType) => {
       const generateImage = triggers.some((item) =>
         messageContent.includes(item)
       );
+      //Remove punctuation from message content
+      const regex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
+      const formattedMessage = messageContent.replace(regex, "");
+
       //If generateImage is true, call openai images generate.
       if (generateImage) {
         const response = await openai.images.generate({
@@ -38,16 +42,16 @@ let send = async (destinationNumber, messageContent, eventType) => {
         //Extract image URL from response object
         const url = [];
         url.push(response.data[0].url);
-        //Call Telnyx message creation function, pass openai image URL, format text response appropriately
+
+        //Call Telnyx message creation function, pass openai image URL, format text response appropriatelyF
         telnyx.messages.create(
           {
             from: telnyxNumber,
             to: destinationNumber,
-            text: `Here is your ${messageContent.slice(
-              messageContent.indexOf(
-                triggers.find((word) => messageContent.includes(word))
-              ),
-              messageContent.length - 1
+            text: `Here is your ${formattedMessage.slice(
+              formattedMessage.indexOf(
+                triggers.find((word) => formattedMessage.includes(word))
+              )
             )}`,
             media_urls: url,
           },
