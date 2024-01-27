@@ -3,7 +3,8 @@ const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
 
-const uploadFile = async (filePath, incomingNumber, msgID, eventType) => {
+const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
+  url = url.toString();
   //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
   const s3Client = new S3({
     endpoint: process.env.SPACES_ENDPOINT,
@@ -14,38 +15,11 @@ const uploadFile = async (filePath, incomingNumber, msgID, eventType) => {
       secretAccessKey: process.env.SPACES_ACCESS_KEY,
     },
   });
+  //If there is attachment on incoming message, get URL from attachment array
+  //Create a file path and save to fileLocation variable
+  const fileLocation = path.resolve(__dirname, formattedMessage);
 
-  //Only upload attachments on the message finalized event from Telnyx response object.
-  //Format destination in spaces by incoming number, name file by message ID.
-  if (eventType === "message.finalized") {
-    try {
-      fileStream = await fs.readFile(filePath);
-      const params = {
-        Bucket: "assistext",
-        Key: `attachments/${incomingNumber}/${msgID}.png`,
-        Body: fileStream,
-        ACL: "private",
-        Metadata: {
-          "x-amz-meta-my-key": "your-value",
-        },
-      };
-      const data = await s3Client.send(new PutObjectCommand(params));
-      console.log(
-        "Successfully uploaded object: " + params.Bucket + "/" + params.Key
-      );
-      return data;
-    } catch (err) {
-      console.log("Error", err);
-    }
-  }
-};
-
-const downloadFile = async (url, incomingNumber, msgID, eventType) => {
-  const fileLocation = path.resolve(
-    __dirname,
-    url.substring(url.lastIndexOf("/") + 1)
-  );
-
+  //Download attachment to fileLocation using attachment URL
   try {
     const response = await axios({
       method: "get",
@@ -56,7 +30,31 @@ const downloadFile = async (url, incomingNumber, msgID, eventType) => {
   } catch (err) {
     throw new Error(err);
   }
-  uploadFile(fileLocation, incomingNumber, msgID, eventType);
+
+  //Only upload attachments on the message finalized event from Telnyx response object
+  //Upload will run whether there is attachment on incoming message or if media is requested from AI
+  //Format destination in spaces by incoming number, name file by message ID
+  try {
+    fileStream = await fs.readFile(fileLocation);
+
+    const params = {
+      Bucket: "assistext",
+      Key: `attachments/${incomingNumber}/${formattedMessage}.png`,
+      Body: fileStream,
+      ACL: "private",
+      Metadata: {
+        message_id: msgID,
+      },
+    };
+    const data = await s3Client.send(new PutObjectCommand(params));
+    console.log(
+      "Successfully uploaded object: " + params.Bucket + "/" + params.Key
+    );
+    await fs.rm(fileLocation);
+    return data;
+  } catch (err) {
+    console.log("Error", err);
+  }
 };
 
-module.exports = downloadFile;
+module.exports = mediaHandler;
