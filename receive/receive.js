@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
 const send = require("../send/send");
 const mediaHandler = require("../media/media");
-require("dotenv").config();
 
 const receive = express();
 receive.use(bodyParser.json());
