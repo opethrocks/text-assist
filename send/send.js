@@ -3,9 +3,11 @@ const OpenAI = require("openai");
 const mediaHandler = require("../media/media");
 require("dotenv").config();
 
-const apiKey = process.env.TELNYX_API_KEY;
-const telnyx = Telnyx(apiKey);
-const openai = new OpenAI(process.env.OPENAI_API_KEY);
+const telnyxApiKey = process.env.TELNYX_API_KEY;
+const openAiApiKey = process.env.OPENAI_API_KEY;
+
+const telnyx = Telnyx(telnyxApiKey);
+const openai = new OpenAI(openAiApiKey);
 
 let send = async (
   incomingNumber,
