@@ -17,7 +17,7 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
   });
   //If there is attachment on incoming message, get URL from attachment array
   //Create a file path and save to fileLocation variable
-  const fileLocation = path.resolve(__dirname, formattedMessage);
+  const fileLocation = path.resolve(__dirname, formattedMessage ? formattedMessage : msgID);
 
   //Download attachment to fileLocation using attachment URL
   try {
@@ -39,7 +39,7 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
 
     const params = {
       Bucket: "assistext",
-      Key: `attachments/${incomingNumber}/${formattedMessage}.png`,
+      Key: `attachments/${incomingNumber}/${formattedMessage ? formattedMessage : msgID}.png`,
       Body: fileStream,
       ACL: "private",
       Metadata: {
