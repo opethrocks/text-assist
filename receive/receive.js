@@ -60,22 +60,23 @@ receive.post("/", async (req, res) => {
       messageContent.includes(item)
     );
     //Remove punctuation from message content and format string for naming the file for storage
-    const regex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
+    const punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
     const formattedMessage = messageContent
-      .replace(regex, "")
+      .replace(punctuationRegex, "")
+
       .slice(
         messageContent.indexOf(
           triggers.find((word) => messageContent.includes(word))
         )
       );
-
+    //If there is attachment on incoming message, get URL from attachment array and call media handler
     if (attachments.length != 0 && eventType == "message.received") {
       const url = attachments.map((attachment) => {
         return attachment.url;
       });
       await mediaHandler(url, incomingNumber, formattedMessage, msgID);
-    } else if (eventType === "message.received") {
       //Call the send module and pass the sender phone number and message text so a reply can be sent.
+    } else if (eventType === "message.received") {
       await send(
         incomingNumber,
         messageContent,
