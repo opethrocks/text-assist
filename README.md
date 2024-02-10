@@ -11,7 +11,3 @@ If an attachment is sent to your assistant, it will be stored in your very own f
 ![image](https://github.com/opethrocks/text-assist/assets/2834141/09781a87-2eda-4f1f-831f-75aaeeddc205)
 
 ![image](https://github.com/opethrocks/text-assist/assets/2834141/704f0b35-672e-45a1-841a-83f9dfee7c55)
-
-![image](https://github.com/opethrocks/text-assist/assets/2834141/a180162c-ab9d-45c6-bb5e-6b877ffe3979)
-
-![image](https://github.com/opethrocks/text-assist/assets/2834141/b2e02d49-00ab-428c-97bd-a25452e96e11)
