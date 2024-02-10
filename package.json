@@ -4,7 +4,8 @@
   "description": "express server for receiving sms/mms",
   "main": "assistext.js",
   "scripts": {
-    "start": "node assistext.js"
+    "start": "node assistext.js",
+    "dev": "nodemon assistext.js"
   },
   "keywords": [],
   "author": "",
