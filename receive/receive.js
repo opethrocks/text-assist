@@ -33,7 +33,7 @@ receive.post("/", async (req, res) => {
       webhookTelnyxSignatureHeader,
       webhookTelnyxTimestampHeader,
       publicKey,
-      timeToleranceInSeconds
+      timeToleranceInSeconds,
     );
   } catch (e) {
     errors.push(e.message);
@@ -54,10 +54,12 @@ receive.post("/", async (req, res) => {
       },
     } = req.body;
 
+    //Call speechToText
+
     //Triggers array of words that indicate a user is a requesting an image
     const triggers = ["image", "photo", "picture", "painting"];
     const generateImage = triggers.some((item) =>
-      messageContent.includes(item)
+      messageContent.includes(item),
     );
     //Remove punctuation from message content and format string for naming the file for storage
     const punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
@@ -66,15 +68,13 @@ receive.post("/", async (req, res) => {
 
       .slice(
         messageContent.indexOf(
-          triggers.find((word) => messageContent.includes(word))
-        )
+          triggers.find((word) => messageContent.includes(word)),
+        ),
       );
     //If there is attachment on incoming message, get URL from attachment array and call media handler
     if (attachments.length != 0 && eventType == "message.received") {
-      const url = attachments.map((attachment) => {
-        return attachment.url;
-      });
-      await mediaHandler(url, incomingNumber, formattedMessage, msgID);
+     
+      await mediaHandler(attachments, incomingNumber, formattedMessage, msgID);
       //Call the send module and pass the sender phone number and message text so a reply can be sent.
     } else if (eventType === "message.received") {
       await send(
@@ -82,7 +82,7 @@ receive.post("/", async (req, res) => {
         messageContent,
         formattedMessage,
         msgID,
-        generateImage
+        generateImage,
       );
     }
   } else {
