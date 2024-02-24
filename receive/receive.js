@@ -73,8 +73,16 @@ receive.post("/", async (req, res) => {
       );
     //If there is attachment on incoming message, get URL from attachment array and call media handler
     if (attachments.length != 0 && eventType == "message.received") {
-     
-      await mediaHandler(attachments, incomingNumber, formattedMessage, msgID);
+      //Destruct content type and URL from attachments array
+      const [{ content_type: mediaType, url: url }] = attachments;
+      //Call mediaHandler and pass arguments
+      await mediaHandler(
+        url,
+        mediaType,
+        incomingNumber,
+        formattedMessage,
+        msgID,
+      );
       //Call the send module and pass the sender phone number and message text so a reply can be sent.
     } else if (eventType === "message.received") {
       await send(

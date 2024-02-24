@@ -2,9 +2,15 @@ const fs = require("fs").promises;
 const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
+const speechToText = require("../ai/speechToText");
 
-const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
-  url = url.toString();
+const mediaHandler = async (
+  url,
+  mediaType,
+  incomingNumber,
+  formattedMessage,
+  msgID,
+) => {
   //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
   const s3Client = new S3({
     endpoint: process.env.SPACES_ENDPOINT,
@@ -19,7 +25,7 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
   //If no text content was sent, only an image, use the msgID parameter from Telnyx message object as the file name
   const fileLocation = path.resolve(
     __dirname,
-    formattedMessage ? formattedMessage : msgID
+    formattedMessage ? formattedMessage : msgID,
   );
 
   //Download attachment to fileLocation using attachment URL
@@ -29,6 +35,9 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
       url: url,
       responseType: "stream",
     });
+    if (mediaType == "audio/mp4") {
+      await speechToText(response.data);
+    }
     await fs.writeFile(fileLocation, response.data);
   } catch (err) {
     throw new Error(err);
@@ -39,6 +48,7 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
   //Format destination in digital ocean S3 spaces by incoming number, name file by message ID
   try {
     fileStream = await fs.readFile(fileLocation);
+
     const params = {
       Bucket: "assistext",
       Key: `attachments/${incomingNumber}/${
