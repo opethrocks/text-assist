@@ -1,6 +1,7 @@
 const Telnyx = require("telnyx");
 const OpenAI = require("openai");
 const mediaHandler = require("../media/media");
+
 require("dotenv").config();
 
 const telnyxApiKey = process.env.TELNYX_API_KEY;
@@ -14,12 +15,12 @@ let send = async (
   messageContent,
   formattedMessage,
   msgID,
-  generateImage
+  generateImage,
 ) => {
   try {
     //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
     const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
-      process.env.TELNYX_MSG_PROFILE_ID
+      process.env.TELNYX_MSG_PROFILE_ID,
     );
 
     /*Destructuring assignment to extract the object containing the phone number from the Telnyx API response.
@@ -56,7 +57,7 @@ let send = async (
             if (err) {
               throw new Error(err);
             }
-          }
+          },
         );
         await mediaHandler(url, incomingNumber, formattedMessage, msgID);
       } else {
@@ -79,7 +80,7 @@ let send = async (
             if (err) {
               throw new Error(err);
             }
-          }
+          },
         );
       }
     }
