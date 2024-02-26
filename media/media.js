@@ -2,7 +2,6 @@ const fs = require("fs").promises;
 const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
-const speechToText = require("../ai/speechToText");
 
 const mediaHandler = async (
   url,
@@ -35,9 +34,10 @@ const mediaHandler = async (
       url: url,
       responseType: "stream",
     });
-    if (mediaType == "audio/mp4") {
-      await speechToText(response.data);
-    }
+    // if (mediaType == "audio/mp4") {
+    //   await speechToText(response.data);
+    // }
+
     await fs.writeFile(fileLocation, response.data);
   } catch (err) {
     throw new Error(err);

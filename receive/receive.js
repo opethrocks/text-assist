@@ -3,14 +3,15 @@ const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
 const send = require("../send/send");
 const mediaHandler = require("../media/media");
-
-const receive = express();
-receive.use(bodyParser.json());
+const transcriptionConfig = require("../controllers/transcriptionConfig");
 
 const apiKey = process.env.TELNYX_API_KEY;
 const publicKey = process.env.TELNYX_PUBLIC_KEY;
-
 const telnyx = Telnyx(apiKey);
+
+const receive = express();
+receive.use(bodyParser.json());
+receive.use(transcriptionConfig);
 
 receive.post("/", async (req, res) => {
   const timeToleranceInSeconds = 300; // Will validate signatures of webhooks up to 5 minutes after Telnyx sent the request
@@ -83,6 +84,7 @@ receive.post("/", async (req, res) => {
         formattedMessage,
         msgID,
       );
+
       //Call the send module and pass the sender phone number and message text so a reply can be sent.
     } else if (eventType === "message.received") {
       await send(

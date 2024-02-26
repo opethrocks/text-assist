@@ -1,4 +1,3 @@
-const fs = require("fs").promises;
 const axios = require("axios");
 const FormData = require("form-data");
 
@@ -26,8 +25,8 @@ const speechToText = async (fileStream) => {
       form,
       config,
     );
-    const transcription = response.data.text;
-    console.log(transcription);
+    transcription = response.data.text;
+    return transcription;
   } catch (error) {
     console.log(error);
   }
