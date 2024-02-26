@@ -11,6 +11,7 @@ const speechToText = async (fileStream) => {
   form.append("file", fileStream, "speech.mp4");
   form.append("model", "whisper-1");
   form.append("response_format", "json");
+  form.append("prompt", "If audio is not English, translate to English")
 
   const config = {
     headers: {
@@ -21,7 +22,7 @@ const speechToText = async (fileStream) => {
 
   try {
     const response = await axios.post(
-      "https://api.openai.com/v1/audio/transcriptions",
+      "https://api.openai.com/v1/audio/translations",
       form,
       config,
     );
