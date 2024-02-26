@@ -10,17 +10,16 @@ const transcriptionConfig = async (req, res, next) => {
     let {
       data: {
         event_type: eventType,
-        id: msgID,
         payload: {
           from: { phone_number: incomingNumber },
-          text: messageContent,
           media: attachments,
           errors: errors,
         },
       },
     } = await req.body;
 
-    if (errors.length == 0 && eventType == "message.received") {
+    //If there are attachments, process with downloading the file
+    if (attachments.length != 0 && eventType == "message.received") {
       const [{ content_type: mediaType, url: url }] = attachments;
 
       //Download attachment to fileLocation using attachment URL
@@ -32,7 +31,7 @@ const transcriptionConfig = async (req, res, next) => {
       //If attachment is audio, call speech to text
       if (mediaType.includes("audio")) {
         let transcription = await speechToText(response.data);
-        telnyxSend(incomingNumber, transcription);
+        await telnyxSend(incomingNumber, transcription);
       }
     }
   } catch (err) {
