@@ -35,7 +35,8 @@ const transcriptionConfig = async (req, res, next) => {
       }
     }
   } catch (err) {
-    throw new Error(err);
+    console.log(err)
+    return
   }
   next();
 };

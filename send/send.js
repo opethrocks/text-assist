@@ -29,60 +29,59 @@ let send = async (
       data: [{ phone_number: telnyxNumber }],
     } = await responseObj.phone_numbers();
 
-    //If the incomingNumber does not match our telnyxNumber, call the chat function or image generator
-    //Also check the message type to prevent double uploads to spaces
+    // //If the incomingNumber does not match our telnyxNumber, call the chat function or image generator
+    // //Also check the message type to prevent double uploads to spaces
     if (incomingNumber != telnyxNumber) {
-      //If generateImage is true, call openai images generate.
-      if (generateImage) {
-        const url = [];
-        const response = await openai.images.generate({
-          model: "dall-e-2",
-          prompt: formattedMessage,
-          n: 1,
-          size: "512x512",
-        });
+      //   //If generateImage is true, call openai images generate.
+      //   if (generateImage) {
+      //     const url = [];
+      //     const response = await openai.images.generate({
+      //       model: "dall-e-2",
+      //       prompt: formattedMessage,
+      //       n: 1,
+      //       size: "512x512",
+      //     });
 
-        //Extract image URL from response object
-        url.push(response.data[0].url);
+      //     //Extract image URL from response object
+      //     url.push(response.data[0].url);
 
-        //Call Telnyx message creation function, pass openai image URL, format text response appropriatelyF
-        telnyx.messages.create(
-          {
-            from: telnyxNumber,
-            to: incomingNumber,
-            text: `Here is your ${formattedMessage}`,
-            media_urls: url,
-          },
-          function (err) {
-            if (err) {
-              throw new Error(err);
-            }
-          },
-        );
-        await mediaHandler(url, incomingNumber, formattedMessage, msgID);
-      } else {
-        //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
-        const completion = await openai.chat.completions.create({
-          messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: messageContent },
-          ],
-          model: "gpt-3.5-turbo",
-        });
-        //Telnyx SMS message creation. The message text will be the AI response found in the competion object.
-        telnyx.messages.create(
-          {
-            from: telnyxNumber,
-            to: incomingNumber,
-            text: completion.choices[0].message.content,
-          },
-          function (err) {
-            if (err) {
-              throw new Error(err);
-            }
-          },
-        );
-      }
+      // //Call Telnyx message creation function, pass openai image URL, format text response appropriatelyF
+      // telnyx.messages.create(
+      //   {
+      //     from: telnyxNumber,
+      //     to: incomingNumber,
+      //     text: `Here is your ${formattedMessage}`,
+      //     media_urls: url,
+      //   },
+      //   function (err) {
+      //     if (err) {
+      //       throw new Error(err);
+      //     }
+      //   },
+      // );
+      await mediaHandler(url, incomingNumber, formattedMessage, msgID);
+    } else {
+      //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
+      const completion = await openai.chat.completions.create({
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: messageContent },
+        ],
+        model: "gpt-3.5-turbo",
+      });
+      //Telnyx SMS message creation. The message text will be the AI response found in the competion object.
+      telnyx.messages.create(
+        {
+          from: telnyxNumber,
+          to: incomingNumber,
+          text: completion.choices[0].message.content,
+        },
+        function (err) {
+          if (err) {
+            throw new Error(err);
+          }
+        },
+      );
     }
   } catch (err) {
     console.log(err);
