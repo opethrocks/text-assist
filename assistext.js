@@ -1,4 +1,4 @@
-const receive = require("./receive/receive");
+const receive = require("./sms/receive");
 const express = require("express");
 
 const app = express();
