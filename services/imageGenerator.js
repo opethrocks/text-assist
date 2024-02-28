@@ -1,5 +1,5 @@
 const OpenAI = require("openai");
-const telnyxSend = require("../services/telnyxSend");
+const telnyxSend = require("../sms/send");
 const completions = require("../services/completions");
 
 

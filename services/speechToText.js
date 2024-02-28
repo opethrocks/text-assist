@@ -1,6 +1,6 @@
 const axios = require("axios");
 const FormData = require("form-data");
-const telnyxSend = require("../services/telnyxSend")
+const telnyxSend = require("../sms/send")
 
 require("dotenv").config();
 
