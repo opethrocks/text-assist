@@ -2,9 +2,14 @@ Leverages the Telnyx API/Node SDK to create an AI Assistant that can communicate
 
 Uses OpenAI Chat Completions with GPT 3.5 Turbo to reply with robust responses to received messages, all via SMS.
 
-Now includes MMS support via OpenAI DALL-E 2. Just ask for a photo, painting or picture and your assistant has you covered!
+Now includes MMS support for requesting images via OpenAI DALL-E 2. Just ask for a photo, painting or picture and your assistant has you covered!
+
+Also supports transcriptions and translations to English thanks to the Whisper API. Just send an audio file to assistant and quickly receive transcriptions via SMS.
 
 If an attachment is sent to your assistant, it will be stored in your very own folder using the Digital Ocean Spaces / AWS S3 API.
+
+
+![image](https://github.com/opethrocks/text-assist/assets/2834141/0bb8d15b-d3e3-4ed9-911d-5c35a03f3a73)
 
 ![image](https://github.com/opethrocks/text-assist/assets/2834141/ee3574b5-555e-4346-b5db-5510a30d22c0)
 
