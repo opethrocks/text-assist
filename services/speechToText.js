@@ -1,14 +1,12 @@
 const axios = require("axios");
 const FormData = require("form-data");
-const telnyxSend = require("../sms/send")
-
-require("dotenv").config();
+const telnyxSend = require("../sms/send");
 
 const openAiApiKey = process.env.OPENAI_API_KEY;
 
 const speechToText = async (attachments, incomingNumber) => {
   try {
-    const [{url: url}] = attachments
+    const [{ url: url }] = attachments;
     //Download attachment to fileLocation using attachment URL
     const fileStream = await axios({
       method: "get",

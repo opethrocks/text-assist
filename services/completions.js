@@ -1,5 +1,5 @@
 const OpenAI = require("openai");
-const telnyxSend = require("../sms/send");
+const send = require("../sms/send");
 
 const openAiApiKey = process.env.OPENAI_API_KEY;
 
@@ -15,7 +15,7 @@ const completions = async (messageContent, incomingNumber) => {
     model: "gpt-3.5-turbo",
   });
   //Call telnyx send and pass ai response & incoming phone number
-  await telnyxSend(incomingNumber, completion.choices[0].message.content);
+  await send(incomingNumber, completion.choices[0].message.content);
 };
 
 module.exports = completions;
