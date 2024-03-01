@@ -8,8 +8,8 @@ Also supports transcriptions and translations to English thanks to the Whisper A
 
 If an attachment is sent to your assistant, it will be stored in your very own folder using the Digital Ocean Spaces / AWS S3 API.
 
-
-![image](https://github.com/opethrocks/text-assist/assets/2834141/0bb8d15b-d3e3-4ed9-911d-5c35a03f3a73)
+Will translate spoken audio from many languages to English:
+![image](https://github.com/opethrocks/text-assist/assets/2834141/e67a0d32-4209-48e8-badf-3bbaf2ddd3bf)
 
 ![image](https://github.com/opethrocks/text-assist/assets/2834141/ee3574b5-555e-4346-b5db-5510a30d22c0)
 
