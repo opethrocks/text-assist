@@ -2,8 +2,6 @@ const axios = require("axios");
 const FormData = require("form-data");
 const telnyxSend = require("../sms/send");
 
-require("dotenv").config();
-
 const openAiApiKey = process.env.OPENAI_API_KEY;
 
 const speechToText = async (attachments, incomingNumber) => {
