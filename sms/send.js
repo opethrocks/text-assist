@@ -6,7 +6,6 @@ const telnyxApiKey = process.env.TELNYX_API_KEY;
 const telnyx = Telnyx(telnyxApiKey);
 
 const telnyxSend = async (incomingNumber, messagePayload, url) => {
-    
   try {
     //Retrieve the messaging profile data payload using our Telnyx messaging profile ID.
     const { data: responseObj } = await telnyx.messagingProfiles.retrieve(
