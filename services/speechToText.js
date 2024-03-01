@@ -4,9 +4,8 @@ const telnyxSend = require("../sms/send");
 
 const openAiApiKey = process.env.OPENAI_API_KEY;
 
-const speechToText = async (attachments, incomingNumber) => {
+const speechToText = async (url, incomingNumber) => {
   try {
-    const [{ url: url }] = attachments;
     //Download attachment to fileLocation using attachment URL
     const fileStream = await axios({
       method: "get",
@@ -31,7 +30,7 @@ const speechToText = async (attachments, incomingNumber) => {
     const response = await axios.post(
       "https://api.openai.com/v1/audio/translations",
       form,
-      config,
+      config
     );
 
     transcription = response.data.text;
