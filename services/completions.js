@@ -14,8 +14,10 @@ const completions = async (messageContent, incomingNumber) => {
     ],
     model: "gpt-3.5-turbo",
   });
+  const messagePayload = completion.choices[0].message.content;
+  
   //Call telnyx send and pass ai response & incoming phone number
-  await send(incomingNumber, completion.choices[0].message.content);
+  await send(incomingNumber, messagePayload);
 };
 
 module.exports = completions;

@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const Telnyx = require("telnyx");
-const imageGenerator = require("../services/imageGenerator");
-const speechToText = require("../services/speechToText");
+const generateController = require("../controllers/generateController");
+const attachmentController = require("../controllers/attachmentController");
 
 const apiKey = process.env.TELNYX_API_KEY;
 const publicKey = process.env.TELNYX_PUBLIC_KEY;
@@ -38,7 +38,7 @@ receive.post("/", async (req, res) => {
       webhookTelnyxSignatureHeader,
       webhookTelnyxTimestampHeader,
       publicKey,
-      timeToleranceInSeconds,
+      timeToleranceInSeconds
     );
   } catch (e) {
     errors.push(e.message);
@@ -49,11 +49,12 @@ receive.post("/", async (req, res) => {
   //If there are errors on the request, send error code
   errors.length === 0 ? res.sendStatus(200) : res.sendStatus(500);
 
-  //Simple conditions to decide which feature is being requested
+  //On message received event, check for attachments. If any, call attachments controller to decide if transcription is needed.
+  //If no attachments, call generate controller to decide whether an image needs to be generated.
   if (eventType === "message.received") {
-    attachments.length === 0
-      ? imageGenerator(messageContent, incomingNumber)
-      : speechToText(attachments, incomingNumber);
+    attachments.length !== 0
+      ? attachmentController(attachments, incomingNumber)
+      : generateController(messageContent, incomingNumber);
   }
 });
 
