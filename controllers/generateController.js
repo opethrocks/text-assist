@@ -1,5 +1,6 @@
 const imageGenerator = require("../services/imageGenerator");
 const completions = require("../services/completions");
+const textToSpeech = require("../services/textToSpeech")
 
 const generateController = async (messageContent, incomingNumber) => {
   //Triggers array of words that indicate a user is a requesting an image
@@ -19,6 +20,8 @@ const generateController = async (messageContent, incomingNumber) => {
   //If image generation is being requested, call image generator, otherwise call completions
   if (generateImage) {
     await imageGenerator(incomingNumber, formattedMessage);
+  } else if (messageContent.includes("transcribe")) {
+    textToSpeech(messageContent, incomingNumber)
   } else {
     await completions(messageContent, incomingNumber);
   }
