@@ -2,6 +2,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
+const send = require("../sms/send");
 
 const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
   //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
@@ -56,11 +57,14 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
       },
     };
 
-    const data = await s3Client.send(new PutObjectCommand(params));
+    //Upload file to s3 bucket
+    await s3Client.send(new PutObjectCommand(params));
 
+    //Remove local copy of file
     await fs.unlink(fileLocation);
 
-    return data;
+    //Send SMS response of successful upload
+    await send(incomingNumber, "I stashed that file for you.");
   } catch (err) {
     console.log("Error", err);
   }
