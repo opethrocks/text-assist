@@ -55,7 +55,7 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
       },
     };
     const data = await s3Client.send(new PutObjectCommand(params));
-    await fs.rm(fileLocation);
+    await fs.unlink(fileLocation);
     return data;
   } catch (err) {
     console.log("Error", err);
