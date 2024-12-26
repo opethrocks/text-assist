@@ -3,28 +3,22 @@ const path = require("path");
 const axios = require("axios");
 const { S3, PutObjectCommand } = require("@aws-sdk/client-s3");
 
-const mediaHandler = async (
-  url,
-  mediaType,
-  incomingNumber,
-  formattedMessage,
-  msgID,
-) => {
+const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
   //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
   const s3Client = new S3({
     endpoint: process.env.SPACES_ENDPOINT,
-    forcePathStyle: false,
+    forcePathStyle: true,
     region: "us-east-1",
     credentials: {
-      accessKeyId: "DO00EXUUYXNLDZRLK6ZX",
-      secretAccessKey: process.env.SPACES_ACCESS_KEY,
+      accessKeyId: process.env.SPACES_ACCESS_KEY,
+      secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY,
     },
   });
   //Create a file path and save to fileLocation variable
   //If no text content was sent, only an image, use the msgID parameter from Telnyx message object as the file name
   const fileLocation = path.resolve(
     __dirname,
-    formattedMessage ? formattedMessage : msgID,
+    formattedMessage ? formattedMessage : msgID
   );
 
   //Download attachment to fileLocation using attachment URL
@@ -45,7 +39,7 @@ const mediaHandler = async (
 
   //Only upload attachments on the message finalized event from Telnyx response object
   //Upload will run whether there is attachment on incoming message or if media is requested from AI
-  //Format destination in digital ocean S3 spaces by incoming number, name file by message ID
+  //Format destination in digital ocean S3 spaces by incoming number, name file by message ID or message content
   try {
     fileStream = await fs.readFile(fileLocation);
 

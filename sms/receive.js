@@ -26,6 +26,7 @@ receive.post("/", async (req, res) => {
         media: attachments,
         errors: errors,
         text: messageContent,
+        id: msgID,
       },
     },
   } = await req.body;
@@ -53,7 +54,7 @@ receive.post("/", async (req, res) => {
   //If no attachments, call generate controller to decide whether an image needs to be generated.
   if (eventType === "message.received") {
     attachments.length !== 0
-      ? attachmentController(attachments, incomingNumber)
+      ? attachmentController(attachments, incomingNumber, messageContent, msgID)
       : generateController(messageContent, incomingNumber);
   }
 });
