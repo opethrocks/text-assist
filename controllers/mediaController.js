@@ -28,9 +28,6 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
       url: url,
       responseType: "stream",
     });
-    // if (mediaType == "audio/mp4") {
-    //   await speechToText(response.data);
-    // }
 
     await fs.writeFile(fileLocation, response.data);
   } catch (err) {
@@ -39,14 +36,18 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
 
   //Only upload attachments on the message finalized event from Telnyx response object
   //Upload will run whether there is attachment on incoming message or if media is requested from AI
-  //Format destination in digital ocean S3 spaces by incoming number, name file by message ID or message content
+  //Format destination in digital ocean S3 spaces by incoming number, name file by date/time or message content if specified
   try {
     fileStream = await fs.readFile(fileLocation);
+
+    let uploadTime = `${new Date()
+      .toLocaleDateString()
+      .replace(/\//g, "-")} at ${new Date().toLocaleTimeString()}`;
 
     const params = {
       Bucket: "assistext",
       Key: `attachments/${incomingNumber}/${
-        formattedMessage ? formattedMessage : msgID
+        formattedMessage ? formattedMessage : uploadTime
       }.png`,
       Body: fileStream,
       ACL: "private",
@@ -54,8 +55,11 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
         message_id: msgID,
       },
     };
+
     const data = await s3Client.send(new PutObjectCommand(params));
-    await fs.rm(fileLocation);
+
+    await fs.unlink(fileLocation);
+
     return data;
   } catch (err) {
     console.log("Error", err);
