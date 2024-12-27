@@ -17,6 +17,17 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
     formattedMessage ? formattedMessage : msgID
   );
 
+  //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
+  const s3Client = new S3({
+    endpoint: process.env.SPACES_ENDPOINT,
+    forcePathStyle: true,
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: process.env.SPACES_ACCESS_KEY,
+      secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY,
+    },
+  });
+
   //Download attachment to fileLocation using attachment URL
   try {
     const response = await axios({
@@ -34,34 +45,29 @@ const mediaHandler = async (url, incomingNumber, formattedMessage, msgID) => {
   //Upload will run whether there is attachment on incoming message or if media is requested from AI
   //Format destination in digital ocean S3 spaces by incoming number, name file by date/time or message content if specified
   try {
+    //Read file that was written above from GET request
     fileStream = await fs.readFile(fileLocation);
 
+    //Get current date and time to name file appropriately if no text is included in MMS
     let uploadTime = `${new Date()
       .toLocaleDateString()
       .replace(/\//g, "-")} at ${new Date().toLocaleTimeString()}`;
 
+    //Get file extension from URL to name the file correctly in s3 bucket so that all file types are supported for retrieval
+    let fileExtension = url.split(/[#?]/)[0].split(".").pop().trim();
+
+    //Parameters object for s3 bucket
     const params = {
       Bucket: "assistext",
       Key: `attachments/${incomingNumber}/${
         formattedMessage ? formattedMessage : uploadTime
-      }.png`,
+      }.${fileExtension}`,
       Body: fileStream,
       ACL: "private",
       Metadata: {
         message_id: msgID,
       },
     };
-
-    //Create new instance of S3 client using Digital Ocean Spaces API (AWS)
-    const s3Client = new S3({
-      endpoint: process.env.SPACES_ENDPOINT,
-      forcePathStyle: true,
-      region: "us-east-1",
-      credentials: {
-        accessKeyId: process.env.SPACES_ACCESS_KEY,
-        secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY,
-      },
-    });
 
     //Upload file to s3 bucket
     await s3Client.send(new PutObjectCommand(params));
