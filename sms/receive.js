@@ -12,6 +12,9 @@ const receive = express();
 receive.use(bodyParser.json());
 
 receive.post("/", async (req, res) => {
+  //Send success right away
+  res.sendStatus(200);
+
   const timeToleranceInSeconds = 300; // Will validate signatures of webhooks up to 5 minutes after Telnyx sent the request
   const webhookTelnyxSignatureHeader = req.header("telnyx-signature-ed25519");
   const webhookTelnyxTimestampHeader = req.header("telnyx-timestamp");
@@ -27,6 +30,7 @@ receive.post("/", async (req, res) => {
         errors: errors,
         text: messageContent,
         id: msgID,
+        direction: msgDirection,
       },
     },
   } = await req.body;
@@ -46,16 +50,17 @@ receive.post("/", async (req, res) => {
     console.log(errors);
   }
 
-  //If errors array is empty, send successful response
   //If there are errors on the request, send error code
-  errors.length === 0 ? res.sendStatus(200) : res.sendStatus(500);
+  if (errors.length !== 0) {
+    res.sendStatus(500);
+  }
 
   //On message received event, check for attachments. If any, call attachments controller to decide if transcription is needed.
   //If no attachments, call generate controller to decide whether an image needs to be generated.
-  if (eventType === "message.received") {
+  if (eventType != "message.finalized") {
     attachments.length !== 0
       ? attachmentController(attachments, incomingNumber, messageContent, msgID)
-      : generateController(messageContent, incomingNumber);
+      : generateController(messageContent, incomingNumber, msgDirection);
   }
 });
 
