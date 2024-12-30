@@ -59,8 +59,14 @@ receive.post("/", async (req, res) => {
   //If no attachments, call generate controller to decide whether an image needs to be generated.
   if (eventType != "message.finalized") {
     attachments.length !== 0
-      ? attachmentController(attachments, incomingNumber, messageContent, msgID)
-      : generateController(messageContent, incomingNumber, msgDirection);
+      ? attachmentController(
+          attachments,
+          incomingNumber,
+          messageContent,
+          msgID,
+          msgDirection
+        )
+      : generateController(messageContent, incomingNumber);
   }
 });
 
