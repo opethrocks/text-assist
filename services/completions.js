@@ -16,7 +16,7 @@ const completions = async (messageContent, incomingNumber) => {
   //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
   const completion = await openai.chat.completions.create({
     messages: [...conversationHistory],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
   });
   const messagePayload = completion.choices[0].message.content;
 
