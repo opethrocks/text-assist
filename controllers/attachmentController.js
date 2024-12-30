@@ -5,14 +5,17 @@ const attachmentController = async (
   attachments,
   incomingNumber,
   formattedMessage,
-  msgID
+  msgID,
+  msgDirection
 ) => {
   const [{ url: url, content_type: mediaType }] = attachments;
 
   //If attachment is an audio file, call speech to text service
-  mediaType.includes("audio")
-    ? await speechToText(url, incomingNumber)
-    : await mediaController(url, incomingNumber, formattedMessage, msgID);
+  if (msgDirection === "inbound") {
+    mediaType.includes("audio")
+      ? await speechToText(url, incomingNumber)
+      : await mediaController(url, incomingNumber, formattedMessage, msgID);
+  }
 };
 
 module.exports = attachmentController;
