@@ -12,7 +12,7 @@ const completions = async (messageContent, incomingNumber) => {
   //Push message content and sender number to conversation history array
   conversationHistory.push({
     role: `${conversationHistory.length == 0 ? "developer" : "user"}`,
-    content: messageContent,
+    content: `${messageContent}. Please limit your response to 1000 characters or less.`,
   });
 
   //OpenAI API call. Pass received messageContent to the OpenAI messages array with a user role
