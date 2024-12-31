@@ -20,8 +20,7 @@ const imageGenerator = async (incomingNumber, formattedMessage) => {
     url.push(await response.data[0].url);
 
     //Call telnyx send to deliver the ai response via MMS
-    await send(incomingNumber, formattedMessage, url);
-    
+    await send(incomingNumber, `Here is your ${formattedMessage}`, url);
   } catch (err) {
     console.log(err);
   }

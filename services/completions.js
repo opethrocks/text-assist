@@ -5,9 +5,11 @@ const openAiApiKey = process.env.OPENAI_API_KEY;
 
 const openai = new OpenAI(openAiApiKey);
 
+//Create empty array for conversation context to allow conversational messaging
 let conversationHistory = [];
 
 const completions = async (messageContent, incomingNumber) => {
+  //Push message content and sender number to conversation history array
   conversationHistory.push({
     role: `${conversationHistory.length == 0 ? "developer" : "user"}`,
     content: messageContent,
