@@ -1,8 +1,8 @@
 Leverages the Telnyx API/Node SDK to create an AI Assistant that can communicate via SMS. 
 
-Uses OpenAI Chat Completions with GPT 3.5 Turbo to reply with robust responses to received messages, all via SMS.
+Uses OpenAI Chat Completions with GPT 4o-mini to reply with robust responses to received messages, all via SMS. Supports conversational messaging with your AI assistant.
 
-Now includes MMS support for requesting images via OpenAI DALL-E 2. Just ask for a photo, painting or picture and your assistant has you covered!
+Now includes MMS support for requesting images via OpenAI DALL-E 2 (due to limitations of MMS). Just ask for a photo, painting or picture and your assistant has you covered!
 
 Also supports transcriptions and translations to English thanks to the Whisper API. Just send an audio file to assistant and quickly receive transcriptions via SMS.
 
